@@ -1,0 +1,51 @@
+---
+- name: Jenkins | Fix OverlayFS bug for Molecule environment
+  ansible.builtin.copy:
+    content: |
+      {
+        "storage-driver": "vfs"
+      }
+    dest: /etc/docker/daemon.json
+    mode: '0644'
+  become: true
+  register: docker_config_fix
+  when: ansible_virtualization_type == 'docker'
+
+- name: Jenkins | Restart Docker after changing driver
+  ansible.builtin.systemd:
+    name: docker
+    state: restarted
+  become: true
+  when: docker_config_fix.changed
+
+- name: Jenkins | Create directories for the project and data
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: 1000
+    group: 1000
+    mode: '0755'
+  loop:
+    - "{{ jenkins_compose_path }}"
+    - "{{ jenkins_data_path }}"
+  become: true
+  notify: Restart Jenkins
+  
+- name: Jenkins | Generate docker-compose.yml file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ jenkins_compose_path }}/docker-compose.yml"
+    mode: '0644'
+  become: true
+
+- name: Jenkins | Delete old container (prevent name conflicts)
+  community.docker.docker_container:
+    name: jenkins
+    state: absent
+  become: true
+
+- name: Jenkins | Start the container using docker-compose
+  community.docker.docker_compose_v2:
+    project_src: "{{ jenkins_compose_path }}"
+    state: present
+  become: true

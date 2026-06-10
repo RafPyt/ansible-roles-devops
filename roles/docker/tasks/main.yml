@@ -1,0 +1,9 @@
+---
+- name: Main | Validate OS
+  ansible.builtin.assert:
+    that: ansible_facts['distribution'] in docker_supported_os
+    fail_msg: "Unsupported OS: {{ ansible_facts['distribution'] }}"
+
+- name: Main | Include docker installation tasks
+  ansible.builtin.import_tasks: docker_install.yml
+

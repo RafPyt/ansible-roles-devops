@@ -1,0 +1,34 @@
+---
+- name: Jenkins | System user management
+  ansible.builtin.user:
+    name: "{{ jenkins_user }}"
+    shell: /bin/bash
+    create_home: true    
+    state: present
+  become: true
+  register: user_creation
+
+- name: Jenkins | SSH configuration for user
+  become: true
+  block:
+    - name: Jenkins | Create an .ssh directory
+      ansible.builtin.file:
+        path: "/home/{{ jenkins_user }}/.ssh"
+        state: directory
+        owner: "{{ jenkins_user }}"
+        group: "{{ jenkins_user }}"
+        mode: '0700'
+
+    - name: Jenkins | Check if the SSH key exists
+      ansible.builtin.stat:
+        path: "/home/{{ jenkins_user }}/.ssh/id_ed25519"
+      register: ssh_key_stat
+
+    - name: Jenkins | Generating an SSH Key Ed25519
+      ansible.builtin.openssh_keypair:
+        path: "/home/{{ jenkins_user }}/.ssh/id_ed25519"
+        type: ed25519
+        owner: "{{ jenkins_user }}"
+        group: "{{ jenkins_user }}"
+        mode: '0600'
+      when: not ssh_key_stat.stat.exists

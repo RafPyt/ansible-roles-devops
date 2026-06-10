@@ -1,0 +1,43 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: jenkins-ubuntu2404
+    image: geerlingguy/docker-ubuntu2404-ansible:latest
+    pre_build_image: true
+    privileged: true
+    published_ports:
+      - 0.0.0.0:8080:8080/tcp
+      - 0.0.0.0:50000:50000/tcp
+    command: /lib/systemd/systemd
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - /var/lib/docker
+      - /lib/modules:/lib/modules:ro
+    cgroupns_mode: host
+    tmpfs:
+      - /run
+      - /run/lock
+      - /tmp
+    env:
+      DOCKER_OPTS: "--storage-driver=vfs"
+
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_ROLES_PATH: "../../../"
+    ANSIBLE_SHELL_EXECUTABLE: /bin/bash
+  config_options:
+    defaults:
+      interpreter_python: auto_silent
+      remote_tmp: /var/tmp/.ansible
+      timeout: 120
+    ssh_connection:
+      pipelining: true
+  playbooks:
+    converge: converge.yml
+
+verifier:
+  name: ansible

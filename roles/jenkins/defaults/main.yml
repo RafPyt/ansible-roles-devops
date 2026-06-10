@@ -1,0 +1,15 @@
+---
+# System user
+jenkins_user: "jenkins"
+
+# Container port settings
+jenkins_http_port: 8080
+jenkins_jnlp_port: 50000
+
+# Paths on the host
+jenkins_data_path: "/var/jenkins"                     #Jenkins data such as configuration, plugins and jobs will be stored here
+jenkins_compose_path: "/var/jenkins/dockercompose"  #This is where the Dockerfile and docker-compose.yml will be stored, which will be used to build the Jenkins image.
+
+# Image configuration, from dockerhub jenkins/jenkins e.g. "lts" , "latest"
+#Image list https://hub.docker.com/r/jenkins/jenkins/tags
+jenkins_image_tag: "latest"

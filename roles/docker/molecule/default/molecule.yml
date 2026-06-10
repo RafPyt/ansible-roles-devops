@@ -1,0 +1,32 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: docker-ubuntu2404
+    image: geerlingguy/docker-ubuntu2404-ansible:latest
+    pre_build_image: true
+    privileged: true
+    command: /lib/systemd/systemd
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    tmpfs:
+      - /run
+      - /run/lock
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}/.."
+    ANSIBLE_SHELL_EXECUTABLE: /bin/bash
+  config_options:
+    defaults:
+      interpreter_python: auto_silent
+      remote_tmp: /var/tmp/.ansible
+    ssh_connection:
+      pipelining: true
+  playbooks:
+    converge: converge.yml
+verifier:
+  name: ansible

@@ -1,0 +1,13 @@
+services:
+  jenkins:
+    image: "jenkins/jenkins:{{ jenkins_image_tag }}"
+    container_name: jenkins
+    restart: always
+    ports:
+      - "{{ jenkins_http_port }}:8080"
+      - "{{ jenkins_jnlp_port }}:50000"
+    volumes:
+      - "{{ jenkins_data_path }}:/var/jenkins_home"
+      - "/etc/hosts:/etc/hosts:ro" 
+    environment:
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=true

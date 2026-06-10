@@ -1,0 +1,21 @@
+---
+- name: Make sure Docker is installed
+  ansible.builtin.import_role:
+    name: docker            
+    tasks_from: docker_install
+
+- name: Jenkins | Installing Python dependencies for Docker modules
+  become: true
+  ansible.builtin.apt:
+    name:
+      - python3-requests
+      - python3-docker
+    state: present
+    update_cache: true 
+
+- name: Main | Include jenkins_user tasks
+  ansible.builtin.import_tasks: jenkins_user.yml
+
+- name: Main | Include jenkins_container.yml tasks
+  ansible.builtin.import_tasks: jenkins_container.yml
+
